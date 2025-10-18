@@ -1,4 +1,4 @@
-# 机器学习实验室 (Machine Learning Lab)
+# 机器学习实验 (Machine Learning Lab)
 
 个人机器学习算法学习与实践项目
 
@@ -109,7 +109,7 @@ $$b := b - \alpha \frac{\partial L}{\partial b}$$
 
 ## 📖 参考资料
 
-- 《统计学习方法（第2版）》- 李航
+- 《机器学习方法（第2版）》- 李航
 - 《机器学习》- 周志华
 - [Scikit-learn Documentation](https://scikit-learn.org/)
 - [NumPy Documentation](https://numpy.org/doc/)
