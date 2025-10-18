@@ -19,6 +19,9 @@
 machine-learning-lab/
 ├── linear_regression/          # 线性回归
 │   └── gradient_descent.py    # 梯度下降法实现
+├── perceptron/                 # 感知机
+│   ├── perceptron_primal.py   # 感知机原始形式
+│   └── perceptron_dual.py     # 感知机对偶形式
 ├── venv/                       # Python虚拟环境
 ├── .gitignore                  # Git忽略文件
 └── README.md                   # 项目说明
@@ -47,6 +50,47 @@ python linear_regression/gradient_descent.py
 - 学习率: 0.01
 - 迭代次数: 1000次
 - 输出: 拟合直线对比图 + 损失曲线图
+
+---
+
+### 2. 感知机 (Perceptron)
+
+感知机是二分类的线性分类模型，是神经网络和支持向量机的基础。
+
+#### 感知机原始形式 (Primal Form)
+- **文件**: `perceptron/perceptron_primal.py`
+- **模型**: $f(x) = \text{sign}(w \cdot x + b)$
+- **算法**: 随机梯度下降
+- **特点**:
+  - 直接更新权重向量 $w$ 和偏置 $b$
+  - 详细输出每次迭代的更新过程
+  - 可视化分类结果和分离超平面
+  - 适合特征维度较低的情况
+
+**运行示例**:
+```bash
+python perceptron/perceptron_primal.py
+```
+
+#### 感知机对偶形式 (Dual Form)
+- **文件**: `perceptron/perceptron_dual.py`
+- **模型**: $f(x) = \text{sign}(\sum_{i=1}^{N} \alpha_i y_i x_i \cdot x + b)$
+- **算法**: 基于样本更新次数的对偶表示
+- **特点**:
+  - 通过 $\alpha$ 向量记录每个样本的更新次数
+  - 预先计算 Gram 矩阵 $G_{ij} = x_i \cdot x_j$ 提高效率
+  - 可以恢复原始形式的参数
+  - 适合样本数量较少的情况
+
+**运行示例**:
+```bash
+python perceptron/perceptron_dual.py
+```
+
+**训练数据**:
+- 正样本: x₁=(3,3)ᵀ, x₂=(4,3)ᵀ
+- 负样本: x₃=(1,1)ᵀ
+- 学习率: η = 1
 
 ## 🛠️ 技术栈
 
@@ -95,17 +139,49 @@ $$b := b - \alpha \frac{\partial L}{\partial b}$$
 
 其中 $\alpha$ 是学习率。
 
+---
+
+### 感知机
+**核心思想**: 线性可分数据的二分类模型，通过误分类驱动的学习算法找到分离超平面。
+
+**模型**: 
+$$f(x) = \text{sign}(w \cdot x + b)$$
+
+**损失函数**: 误分类点到超平面的总距离
+$$L(w, b) = -\sum_{x_i \in M} y_i(w \cdot x_i + b)$$
+
+其中 $M$ 是误分类点的集合。
+
+**原始形式更新规则**:
+$$w \leftarrow w + \eta y_i x_i$$
+$$b \leftarrow b + \eta y_i$$
+
+**对偶形式表示**:
+$$f(x) = \text{sign}\left(\sum_{i=1}^{N} \alpha_i y_i x_i \cdot x + b\right)$$
+
+对偶形式的优势是可以预先计算 Gram 矩阵，当样本数远小于特征维度时更高效。
+
 ## 📈 后续计划
 
+**监督学习**:
+- [x] 线性回归 - 梯度下降法
+- [x] 感知机 - 原始形式
+- [x] 感知机 - 对偶形式
+- [ ] k近邻法 (k-NN)
+- [ ] 朴素贝叶斯
+- [ ] 决策树
+- [ ] 逻辑回归与最大熵模型
+- [ ] 支持向量机 (SVM)
+- [ ] 提升方法 (AdaBoost)
+- [ ] EM算法
+- [ ] 隐马尔可夫模型
+
+**其他算法**:
 - [ ] 多项式回归
 - [ ] 正则化 (Ridge/Lasso)
-- [ ] 逻辑回归 (Logistic Regression)
-- [ ] 决策树 (Decision Tree)
-- [ ] 支持向量机 (SVM)
-- [ ] K近邻算法 (KNN)
 - [ ] 聚类算法 (K-Means)
-- [ ] 神经网络 (Neural Network)
 - [ ] 主成分分析 (PCA)
+- [ ] 神经网络基础
 
 ## 📖 参考资料
 
