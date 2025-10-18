@@ -1,4 +1,4 @@
-# 机器学习实验室 (Machine Learning Lab)
+# 机器学习实验 (Machine Learning Lab)
 
 个人机器学习算法学习与实践项目
 
