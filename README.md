@@ -149,10 +149,14 @@ main(query_point=[5, 5], k=3)
 - **方法**: Maximum Likelihood Estimation
 - **特点**:
   - 使用极大似然估计计算先验概率和条件概率
-  - 先验概率：P(Y=c_k) = N_ck / N
-  - 条件概率：P(X^(j)=a_jl | Y=c_k) = N_ck_jl / N_ck
   - 详细输出所有概率计算过程
   - 适用于训练数据充足的情况
+
+**先验概率**:
+$$P(Y=c_k) = \frac{N_{c_k}}{N}$$
+
+**条件概率**:
+$$P(X^{(j)}=a_{jl}|Y=c_k) = \frac{N_{c_k,jl}}{N_{c_k}}$$
 
 **运行示例**:
 ```bash
@@ -164,10 +168,14 @@ python naive_bayes/naive_bayes_mle.py
 - **方法**: Bayesian Estimation with Laplace Smoothing
 - **特点**:
   - 使用贝叶斯估计（加一平滑）避免概率为0
-  - 先验概率：P(Y=c_k) = (N_ck + λ) / (N + K·λ)
-  - 条件概率：P(X^(j)=a_jl | Y=c_k) = (N_ck_jl + λ) / (N_ck + S_j·λ)
-  - λ=1 时为拉普拉斯平滑
+  - $\lambda=1$ 时为拉普拉斯平滑
   - 解决训练数据不足导致的概率估计问题
+
+**先验概率**:
+$$P(Y=c_k) = \frac{N_{c_k} + \lambda}{N + K \cdot \lambda}$$
+
+**条件概率**:
+$$P(X^{(j)}=a_{jl}|Y=c_k) = \frac{N_{c_k,jl} + \lambda}{N_{c_k} + S_j \cdot \lambda}$$
 
 **运行示例**:
 ```bash
