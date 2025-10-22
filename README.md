@@ -29,6 +29,9 @@ machine-learning-lab/
 ├── naive_bayes/                # 朴素贝叶斯
 │   ├── naive_bayes_mle.py     # 极大似然估计
 │   └── naive_bayes_est.py     # 贝叶斯估计(拉普拉斯平滑)
+├── decision_tree/              # 决策树
+│   ├── decision_tree_classifier.py  # 分类树(基尼指数)
+│   └── decision_tree_regressor.py   # 回归树(MSE)
 ├── venv/                       # Python虚拟环境
 ├── .gitignore                  # Git忽略文件
 └── README.md                   # 项目说明
@@ -189,6 +192,67 @@ python naive_bayes/naive_bayes_est.py
 - 测试样本：(2, S)
 - **预测结果**：两种方法都预测为 Y = -1
 
+---
+
+### 5. 决策树 (Decision Tree)
+
+决策树是一种基本的分类与回归方法，通过树形结构进行决策。
+
+#### 分类树 (Classification Tree)
+- **文件**: `decision_tree/decision_tree_classifier.py`
+- **分裂准则**: 基尼指数 (Gini Index)
+- **特点**:
+  - 使用基尼指数选择最优特征和切分点
+  - 递归构建决策树
+  - 支持类别型特征（自动编码）
+  - 输出可读的决策规则
+  - 适用于分类问题
+
+**基尼指数**:
+$$\text{Gini}(D) = 1 - \sum_{k=1}^{K} p_k^2$$
+
+**分裂后的基尼指数**:
+$$\text{Gini}(D, A) = \frac{|D_1|}{|D|}\text{Gini}(D_1) + \frac{|D_2|}{|D|}\text{Gini}(D_2)$$
+
+**运行示例**:
+```bash
+python decision_tree/decision_tree_classifier.py
+```
+
+**训练数据** - 贷款审批数据集:
+- 14个样本，4个特征（年龄、有工作、有房子、信贷情况）
+- 2个类别（同意贷款、拒绝贷款）
+- 训练集准确率：100%
+- **决策规则示例**: 
+  - 有房子 → 同意贷款
+  - 无房子且信贷好 → 同意贷款
+  - 无房子且信贷一般 → 拒绝贷款
+
+#### 回归树 (Regression Tree)
+- **文件**: `decision_tree/decision_tree_regressor.py`
+- **分裂准则**: 均方误差 (MSE - Mean Squared Error)
+- **特点**:
+  - 使用MSE最小化选择分裂点
+  - 叶节点预测值为区域内样本均值
+  - 可视化拟合曲线
+  - 适用于回归问题
+
+**均方误差**:
+$$\text{MSE} = \frac{1}{n}\sum_{i=1}^{n}(y_i - \bar{y})^2$$
+
+**分裂后的MSE**:
+$$\text{MSE}_{\text{split}} = \frac{n_{\text{left}}}{n}\text{MSE}_{\text{left}} + \frac{n_{\text{right}}}{n}\text{MSE}_{\text{right}}$$
+
+**运行示例**:
+```bash
+python decision_tree/decision_tree_regressor.py
+```
+
+**训练数据**:
+- 10个样本点：(1, 4.50), (2, 4.75), ..., (10, 9.00)
+- 训练集 MSE: 0.0525
+- 训练集 R²: 0.9810
+
 ## 🛠️ 技术栈
 
 - **Python**: 3.13+
@@ -305,6 +369,36 @@ $$P(X^{(j)}=a_{jl}|Y=c_k) = \frac{N_{c_k,jl} + \lambda}{N_{c_k} + S_j \cdot \lam
 **分类决策**:
 $$y = \arg\max_{c_k} P(Y=c_k) \prod_{j=1}^{n} P(X^{(j)}=x^{(j)}|Y=c_k)$$
 
+---
+
+### 决策树
+**核心思想**: 通过树形结构表示决策过程，每个内部节点表示一个特征上的测试，每个分支代表测试结果，每个叶节点存放一个类标记或预测值。
+
+**分类树 - 基尼指数**:
+
+基尼指数表示集合的不纯度：
+$$\text{Gini}(D) = 1 - \sum_{k=1}^{K} p_k^2$$
+
+其中 $p_k$ 是样本属于第k类的概率。
+
+特征A条件下的基尼指数：
+$$\text{Gini}(D, A) = \frac{|D_1|}{|D|}\text{Gini}(D_1) + \frac{|D_2|}{|D|}\text{Gini}(D_2)$$
+
+选择基尼指数最小的特征及其切分点。
+
+**回归树 - 均方误差**:
+
+划分点s处的平方误差：
+$$\min_{s}\left[\min_{c_1}\sum_{x_i \in R_1(s)}(y_i - c_1)^2 + \min_{c_2}\sum_{x_i \in R_2(s)}(y_i - c_2)^2\right]$$
+
+其中 $c_1$ 和 $c_2$ 分别是左右区域的输出值（均值）。
+
+**停止条件**:
+- 节点中样本属于同一类别
+- 达到最大深度
+- 样本数小于最小分裂数
+- MSE/基尼指数减少量小于阈值
+
 ## 📈 学习计划与进度
 
 ### 监督学习算法
@@ -317,7 +411,8 @@ $$y = \arg\max_{c_k} P(Y=c_k) \prod_{j=1}^{n} P(X^{(j)}=x^{(j)}|Y=c_k)$$
 | ✅ | **k近邻法 (k-NN) - k-d树** |
 | ✅ | **朴素贝叶斯 - 极大似然估计** |
 | ✅ | **朴素贝叶斯 - 贝叶斯估计** |
-| ⬜ | 决策树 |
+| ✅ | **决策树 - 分类树 (基尼指数)** |
+| ✅ | **决策树 - 回归树 (MSE)** |
 | ⬜ | 逻辑回归与最大熵模型 |
 | ⬜ | 支持向量机 (SVM) |
 | ⬜ | 提升方法 (AdaBoost) |
@@ -334,7 +429,7 @@ $$y = \arg\max_{c_k} P(Y=c_k) \prod_{j=1}^{n} P(X^{(j)}=x^{(j)}|Y=c_k)$$
 | ⬜ | 主成分分析 (PCA) |
 | ⬜ | 神经网络基础 |
 
-**进度统计**: 已完成 6 / 16 个算法 (37.5%)
+**进度统计**: 已完成 8 / 16 个算法 (50.0%)
 
 ## 📖 参考资料
 
