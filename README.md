@@ -32,6 +32,8 @@ machine-learning-lab/
 ├── decision_tree/              # 决策树
 │   ├── decision_tree_classifier.py  # 分类树(基尼指数)
 │   └── decision_tree_regressor.py   # 回归树(MSE)
+├── logistic_regression/        # 逻辑斯谛回归
+│   └── binomial_logistic_regression.py  # 二项逻辑斯谛回归
 ├── venv/                       # Python虚拟环境
 ├── .gitignore                  # Git忽略文件
 └── README.md                   # 项目说明
@@ -255,6 +257,55 @@ python decision_tree/decision_tree_regressor.py
 - 训练集 MSE: 0.0525
 - 训练集 R²: 0.9810
 
+---
+
+### 6. 逻辑斯谛回归 (Logistic Regression)
+
+逻辑斯谛回归是一种广义线性模型，用于解决分类问题，特别是二分类问题。
+
+#### 二项逻辑斯谛回归 (Binomial Logistic Regression)
+- **文件**: `logistic_regression/binomial_logistic_regression.py`
+- **方法**: 梯度下降法
+- **特点**:
+  - 使用 Sigmoid 函数将线性组合映射到 [0,1] 区间
+  - 基于极大似然估计的损失函数
+  - 梯度下降法优化参数
+  - 可视化决策边界和训练过程
+  - 适用于二分类问题
+
+**Sigmoid 函数**:
+
+$$\sigma(z) = \frac{1}{1 + e^{-z}}$$
+
+**模型**:
+
+$$P(Y=1|x) = \frac{1}{1 + \exp(-(w \cdot x + b))}$$
+
+**损失函数（负对数似然）**:
+
+$$L(w,b) = -\frac{1}{n}\sum_{i=1}^{n}[y_i \log(p_i) + (1-y_i)\log(1-p_i)]$$
+
+**梯度**:
+
+$$\frac{\partial L}{\partial w} = \frac{1}{n}\sum_{i=1}^{n}(p_i - y_i)x_i$$
+
+$$\frac{\partial L}{\partial b} = \frac{1}{n}\sum_{i=1}^{n}(p_i - y_i)$$
+
+**运行示例**:
+```bash
+python logistic_regression/binomial_logistic_regression.py
+```
+
+**训练数据** - 学生考试通过预测:
+- 20个样本：学习时长（0.5-5.5小时）与考试结果（通过/未通过）
+- 通过人数：10人，未通过人数：10人
+- 训练集准确率：80.00%
+- **决策边界**: 学习时长约 2.7 小时
+- **预测示例**:
+  - 学习 1.0 小时 → 通过概率 7% → 未通过
+  - 学习 3.0 小时 → 通过概率 61% → 通过
+  - 学习 5.0 小时 → 通过概率 97% → 通过
+
 ## 🛠️ 技术栈
 
 - **Python**: 3.13+
@@ -401,6 +452,66 @@ $$\min_{s}\left[\min_{c_1}\sum_{x_i \in R_1(s)}(y_i - c_1)^2 + \min_{c_2}\sum_{x
 - 样本数小于最小分裂数
 - MSE/基尼指数减少量小于阈值
 
+---
+
+### 逻辑斯谛回归
+**核心思想**: 通过 Sigmoid 函数将线性模型的输出映射到 (0,1) 区间，表示样本属于某类的概率，是一种广义线性模型。
+
+**Sigmoid 函数**:
+$$\sigma(z) = \frac{1}{1 + e^{-z}}$$
+
+性质：
+- 值域为 (0, 1)，可解释为概率
+- 单调递增
+- $\sigma(0) = 0.5$
+
+**二项逻辑斯谛回归模型**:
+$$P(Y=1|x) = \frac{1}{1 + \exp(-(w \cdot x + b))}$$
+
+$$P(Y=0|x) = 1 - P(Y=1|x)$$
+
+**极大似然估计**:
+
+似然函数：
+$$L(w,b) = \prod_{i=1}^{n} [p_i]^{y_i}[1-p_i]^{1-y_i}$$
+
+对数似然函数：
+$$\log L(w,b) = \sum_{i=1}^{n}[y_i \log(p_i) + (1-y_i)\log(1-p_i)]$$
+
+**损失函数（负对数似然）**:
+$$J(w,b) = -\frac{1}{n}\sum_{i=1}^{n}[y_i \log(p_i) + (1-y_i)\log(1-p_i)]$$
+
+这也称为交叉熵损失（Cross-Entropy Loss）。
+
+**梯度下降更新规则**:
+
+梯度：
+$$\frac{\partial J}{\partial w} = \frac{1}{n}\sum_{i=1}^{n}(p_i - y_i)x_i$$
+
+$$\frac{\partial J}{\partial b} = \frac{1}{n}\sum_{i=1}^{n}(p_i - y_i)$$
+
+参数更新：
+$$w \leftarrow w - \alpha \frac{\partial J}{\partial w}$$
+
+$$b \leftarrow b - \alpha \frac{\partial J}{\partial b}$$
+
+其中 $\alpha$ 是学习率。
+
+**决策边界**:
+
+当 $P(Y=1|x) = 0.5$ 时，即 $w \cdot x + b = 0$，这就是决策边界。
+
+对于一维特征：$x = -\frac{b}{w}$
+
+**优点**:
+- 输出具有概率意义
+- 计算代价低，易于实现
+- 可解释性强
+
+**局限性**:
+- 只能处理线性可分或近似线性可分的问题
+- 对特征共线性敏感
+
 ## 📈 学习计划与进度
 
 ### 监督学习算法
@@ -415,7 +526,8 @@ $$\min_{s}\left[\min_{c_1}\sum_{x_i \in R_1(s)}(y_i - c_1)^2 + \min_{c_2}\sum_{x
 | ✅ | **朴素贝叶斯 - 贝叶斯估计** |
 | ✅ | **决策树 - 分类树 (基尼指数)** |
 | ✅ | **决策树 - 回归树 (MSE)** |
-| ⬜ | 逻辑回归与最大熵模型 |
+| ✅ | **逻辑斯谛回归 - 二项逻辑斯谛回归** |
+| ⬜ | 最大熵模型 |
 | ⬜ | 支持向量机 (SVM) |
 | ⬜ | 提升方法 (AdaBoost) |
 | ⬜ | EM算法 |
@@ -431,7 +543,7 @@ $$\min_{s}\left[\min_{c_1}\sum_{x_i \in R_1(s)}(y_i - c_1)^2 + \min_{c_2}\sum_{x
 | ⬜ | 主成分分析 (PCA) |
 | ⬜ | 神经网络基础 |
 
-**进度统计**: 已完成 8 / 16 个算法 (50.0%)
+**进度统计**: 已完成 9 / 17 个算法 (52.9%)
 
 ## 📖 参考资料
 
