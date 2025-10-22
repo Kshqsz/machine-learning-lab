@@ -501,7 +501,9 @@ $$b \leftarrow b - \alpha \frac{\partial J}{\partial b}$$
 
 当 $P(Y=1|x) = 0.5$ 时，即 $w \cdot x + b = 0$，这就是决策边界。
 
-对于一维特征：$$x = -\frac{b}{w}$$
+对于一维特征：
+
+$$x = -\frac{b}{w}$$
 
 **优点**:
 - 输出具有概率意义
