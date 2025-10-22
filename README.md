@@ -466,6 +466,7 @@ $$\sigma(z) = \frac{1}{1 + e^{-z}}$$
 - $\sigma(0) = 0.5$
 
 **二项逻辑斯谛回归模型**:
+
 $$P(Y=1|x) = \frac{1}{1 + \exp(-(w \cdot x + b))}$$
 
 $$P(Y=0|x) = 1 - P(Y=1|x)$$
@@ -473,12 +474,15 @@ $$P(Y=0|x) = 1 - P(Y=1|x)$$
 **极大似然估计**:
 
 似然函数：
+
 $$L(w,b) = \prod_{i=1}^{n} [p_i]^{y_i}[1-p_i]^{1-y_i}$$
 
 对数似然函数：
+
 $$\log L(w,b) = \sum_{i=1}^{n}[y_i \log(p_i) + (1-y_i)\log(1-p_i)]$$
 
 **损失函数（负对数似然）**:
+
 $$J(w,b) = -\frac{1}{n}\sum_{i=1}^{n}[y_i \log(p_i) + (1-y_i)\log(1-p_i)]$$
 
 这也称为交叉熵损失（Cross-Entropy Loss）。
@@ -486,11 +490,13 @@ $$J(w,b) = -\frac{1}{n}\sum_{i=1}^{n}[y_i \log(p_i) + (1-y_i)\log(1-p_i)]$$
 **梯度下降更新规则**:
 
 梯度：
+
 $$\frac{\partial J}{\partial w} = \frac{1}{n}\sum_{i=1}^{n}(p_i - y_i)x_i$$
 
 $$\frac{\partial J}{\partial b} = \frac{1}{n}\sum_{i=1}^{n}(p_i - y_i)$$
 
 参数更新：
+
 $$w \leftarrow w - \alpha \frac{\partial J}{\partial w}$$
 
 $$b \leftarrow b - \alpha \frac{\partial J}{\partial b}$$
