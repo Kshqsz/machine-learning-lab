@@ -241,8 +241,7 @@ python decision_tree/decision_tree_classifier.py
 $$\text{MSE} = \frac{1}{n}\sum_{i=1}^{n}(y_i - \bar{y})^2$$
 
 **分裂后的MSE**:
-$\text{MSE}_{\text{split}} = \frac{n_{\text{left}}}{n}\text{MSE}_{\text{left}} + \frac{n_{\text{right}}}{n}\text{MSE}_{\text{right}}$
-
+$$\text{MSE}_{\text{split}} = \frac{n_{\text{left}}}{n}\text{MSE}_{\text{left}} + \frac{n_{\text{right}}}{n}\text{MSE}_{\text{right}}$$
 
 **运行示例**:
 ```bash
