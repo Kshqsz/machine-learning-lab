@@ -37,6 +37,8 @@ machine-learning-lab/
 │   └── multinomial_logisitic_regression.py  # 多项逻辑斯谛回归
 ├── max_entropy/                # 最大熵模型
 │   └── max_entropy_nlp_demo.py  # 中文词性标注Demo
+├── pytorch/                    # PyTorch深度学习
+│   └── tensor_basics.py       # 张量基础操作
 ├── venv/                       # Python虚拟环境
 ├── .gitignore                  # Git忽略文件
 └── README.md                   # 项目说明
@@ -469,6 +471,7 @@ python max_entropy/max_entropy_nlp_demo.py
 - **Pandas**: 数据处理
 - **Matplotlib**: 数据可视化
 - **Scikit-learn**: 机器学习库（用于对比验证）
+- **PyTorch**: 深度学习框架（2.9.0+，支持MPS加速）
 
 ## 🚀 快速开始
 
@@ -487,7 +490,11 @@ source venv/bin/activate  # macOS/Linux
 
 ### 3. 安装依赖
 ```bash
+# 基础依赖
 pip install numpy pandas scikit-learn matplotlib
+
+# PyTorch (可选，用于深度学习)
+pip install torch torchvision torchaudio
 ```
 
 ### 4. 运行示例
