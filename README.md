@@ -729,7 +729,15 @@ $$H(P) = -\sum_{x,y} \tilde{P}(x) P(y|x) \log P(y|x)$$
 
 **特征函数**:
 
-$$f_i(x, y) = \begin{cases} 1, & \text{如果}x,y\text{满足某个事实} \\ 0, & \text{否则} \end{cases}$$
+$$
+f_i(x, y) = 
+\begin{cases} 
+1, & \text{if } x,y \text{ satisfy certain condition} \\ 
+0, & \text{otherwise}
+\end{cases}
+$$
+
+特征函数表示：如果 $(x,y)$ 满足某个事实或条件，取值为1；否则为0。
 
 **约束条件**:
 
