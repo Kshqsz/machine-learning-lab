@@ -728,6 +728,7 @@ $$H(P) = -\sum_{x,y} \tilde{P}(x) P(y|x) \log P(y|x)$$
 其中 $\tilde{P}(x)$ 是经验分布。
 
 **特征函数**:
+
 $$f_i(x, y) = \begin{cases} 1, & \text{如果}x,y\text{满足某个事实} \\ 0, & \text{否则} \end{cases}$$
 
 **约束条件**:
