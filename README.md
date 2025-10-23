@@ -33,7 +33,10 @@ machine-learning-lab/
 │   ├── decision_tree_classifier.py  # 分类树(基尼指数)
 │   └── decision_tree_regressor.py   # 回归树(MSE)
 ├── logistic_regression/        # 逻辑斯谛回归
-│   └── binomial_logistic_regression.py  # 二项逻辑斯谛回归
+│   ├── binomial_logistic_regression.py   # 二项逻辑斯谛回归
+│   └── multinomial_logisitic_regression.py  # 多项逻辑斯谛回归
+├── max_entropy/                # 最大熵模型
+│   └── max_entropy_nlp_demo.py  # 中文词性标注Demo
 ├── venv/                       # Python虚拟环境
 ├── .gitignore                  # Git忽略文件
 └── README.md                   # 项目说明
@@ -306,6 +309,159 @@ python logistic_regression/binomial_logistic_regression.py
   - 学习 3.0 小时 → 通过概率 61% → 通过
   - 学习 5.0 小时 → 通过概率 97% → 通过
 
+#### 多项逻辑斯谛回归 (Multinomial Logistic Regression)
+- **文件**: `logistic_regression/multinomial_logisitic_regression.py`
+- **方法**: BFGS拟牛顿法
+- **特点**:
+  - 使用 Softmax 函数处理多分类问题
+  - 基于极大似然估计
+  - BFGS优化算法，收敛速度快
+  - 可视化多分类决策边界
+  - 适用于多分类问题（K ≥ 2）
+
+**Softmax 函数**:
+
+$$P(Y=k|x) = \frac{\exp(w_k \cdot x + b_k)}{\sum_{j=1}^{K}\exp(w_j \cdot x + b_j)}$$
+
+**模型**:
+
+对于 K 个类别，需要学习 K 组参数 $(w_1, b_1), ..., (w_K, b_K)$
+
+**损失函数（交叉熵）**:
+
+$$J(W,b) = -\frac{1}{n}\sum_{i=1}^{n}\sum_{k=1}^{K} \mathbb{1}(y_i=k) \log P(Y=k|x_i)$$
+
+其中 $\mathbb{1}(\cdot)$ 是指示函数。
+
+**梯度**:
+
+$$\frac{\partial J}{\partial w_k} = \frac{1}{n}\sum_{i=1}^{n}(P(Y=k|x_i) - \mathbb{1}(y_i=k))x_i$$
+
+$$\frac{\partial J}{\partial b_k} = \frac{1}{n}\sum_{i=1}^{n}(P(Y=k|x_i) - \mathbb{1}(y_i=k))$$
+
+**运行示例**:
+```bash
+python logistic_regression/multinomial_logisitic_regression.py
+```
+
+**训练数据** - 鸢尾花分类:
+- 48个样本：花瓣长度、花瓣宽度 → 3种鸢尾花（Setosa、Versicolor、Virginica）
+- 类别分布：Setosa 16个，Versicolor 16个，Virginica 16个
+- 训练集准确率：77.08%
+- **特点**: 使用BFGS优化，自动计算梯度，收敛快且稳定
+- **决策边界**: 可视化展示三个类别的非线性分离超平面
+
+---
+
+### 7. 最大熵模型 (Maximum Entropy Model)
+
+最大熵模型是一种基于最大熵原理的分类模型，属于对数线性模型。在满足已知约束条件的前提下，选择熵最大的模型。
+
+#### 最大熵NLP演示 - 中文词性标注 (POS Tagging)
+- **文件**: `max_entropy/max_entropy_nlp_demo.py`
+- **方法**: 梯度下降法
+- **应用场景**: 中文词性标注（Part-of-Speech Tagging）
+- **特点**:
+  - 丰富的特征工程（7种特征类型）
+  - 手工标注的中文训练数据
+  - 支持8种常见词性标签
+  - 梯度下降优化，过程可视化
+  - 完整的训练、测试和预测流程
+
+**最大熵模型**:
+
+条件概率分布：
+
+$$P(y|x) = \frac{1}{Z(x)}\exp\left(\sum_{i=1}^{n}w_i f_i(x,y)\right)$$
+
+归一化因子：
+
+$$Z(x) = \sum_{y}\exp\left(\sum_{i=1}^{n}w_i f_i(x,y)\right)$$
+
+**与多项逻辑斯谛回归的关系**:
+
+最大熵模型在形式上等价于多项逻辑斯谛回归：
+- 都使用 Softmax 进行归一化
+- 都是对数线性模型
+- 区别在于特征函数的构造方式
+
+**特征工程** - 7种特征类型:
+
+1. **当前词特征**: `word=我`, `word=喜欢`
+2. **前一个词**: `prev_word=我`, `prev_word=喜欢`
+3. **后一个词**: `next_word=喜欢`, `next_word=中国`
+4. **词长度**: `word_len=1`, `word_len=2`
+5. **包含数字**: `has_digit=True`
+6. **前缀**: `prefix_1=学`, `prefix_2=学习`
+7. **后缀**: `suffix_1=习`, `suffix_2=学习`
+8. **偏置**: `bias=1`（所有样本）
+
+**词性标签** (8种):
+
+| 标签 | 词性 | 示例 |
+|:---:|------|------|
+| n | 名词 (Noun) | 中国、音乐、书 |
+| v | 动词 (Verb) | 爱、喜欢、学习 |
+| a | 形容词 (Adjective) | 好、冷、干净 |
+| d | 副词 (Adverb) | 很、非常、都 |
+| p | 介词 (Preposition) | 在、从、对 |
+| m | 数词 (Numeral) | 一、五、十 |
+| q | 量词 (Quantifier) | 本、个、条 |
+| r | 代词 (Pronoun) | 我、他、这 |
+
+**损失函数**:
+
+负对数似然 + L2正则化：
+
+$$L(w) = -\sum_{(x,y)}\log P(y|x) + \lambda \|w\|^2$$
+
+**梯度**:
+
+$$\frac{\partial L}{\partial w_i} = \sum_{(x,y)}[P(y|x)f_i(x,y) - f_i(x,y_{\text{true}})] + 2\lambda w_i$$
+
+**优化算法**:
+
+使用梯度下降法：
+- 学习率: 0.1
+- 最大迭代: 50次
+- 收敛阈值: 1e-4
+- 监控权重变化和损失变化
+
+**运行示例**:
+```bash
+python max_entropy/max_entropy_nlp_demo.py
+```
+
+**训练数据** - 中文句子标注:
+- 训练集：21个句子，涵盖日常用语
+- 测试集：5个句子
+- 特征总数：252个
+- 训练集准确率：100.00%
+- 测试集准确率：94.44%
+
+**标注示例**:
+```
+句子: 我 喜欢 音乐
+标注: 我(r) 喜欢(v) 音乐(n)
+
+句子: 这 是 一 本 书
+标注: 这(r) 是(v) 一(m) 本(q) 书(n)
+
+句子: 天气 很 冷
+标注: 天气(n) 很(d) 冷(a)
+```
+
+**预测功能**:
+- 对新句子进行词性标注
+- 输出每个词的Top-3概率分布
+- 可视化预测结果
+
+**优势**:
+- 特征灵活，易于添加新特征
+- 概率输出，具有可解释性
+- 适用于序列标注任务
+- 训练过程透明，可监控优化进展
+
 ## 🛠️ 技术栈
 
 - **Python**: 3.13+
@@ -520,6 +676,129 @@ $$x = -\frac{b}{w}$$
 - 只能处理线性可分或近似线性可分的问题
 - 对特征共线性敏感
 
+---
+
+### 多项逻辑斯谛回归
+**核心思想**: 将二项逻辑斯谛回归推广到多分类问题，使用 Softmax 函数将线性输出转换为概率分布。
+
+**Softmax 函数**:
+$$P(Y=k|x) = \frac{\exp(w_k \cdot x + b_k)}{\sum_{j=1}^{K}\exp(w_j \cdot x + b_j)}$$
+
+性质：
+- 输出K个概率值，和为1
+- 单调性：线性得分越高，概率越大
+- 当K=2时退化为二项逻辑斯谛回归
+
+**参数**:
+对于K个类别，需要学习K组参数：
+$$(w_1, b_1), (w_2, b_2), ..., (w_K, b_K)$$
+
+**损失函数（交叉熵）**:
+
+$$J(W,b) = -\frac{1}{n}\sum_{i=1}^{n}\sum_{k=1}^{K} \mathbb{1}(y_i=k) \log P(Y=k|x_i)$$
+
+其中 $\mathbb{1}(\cdot)$ 是指示函数，当 $y_i=k$ 时为1，否则为0。
+
+**梯度计算**:
+
+对于第k类的参数：
+
+$$\frac{\partial J}{\partial w_k} = \frac{1}{n}\sum_{i=1}^{n}(P(Y=k|x_i) - \mathbb{1}(y_i=k))x_i$$
+
+$$\frac{\partial J}{\partial b_k} = \frac{1}{n}\sum_{i=1}^{n}(P(Y=k|x_i) - \mathbb{1}(y_i=k))$$
+
+**优化算法**:
+- 梯度下降法：简单但可能较慢
+- BFGS拟牛顿法：自动计算近似Hessian矩阵，收敛快
+- L-BFGS：BFGS的内存优化版本
+
+**决策规则**:
+$$\hat{y} = \arg\max_k P(Y=k|x)$$
+
+选择概率最大的类别作为预测结果。
+
+---
+
+### 最大熵模型
+**核心思想**: 在满足约束条件的前提下，选择熵最大的概率分布。熵最大意味着对未知信息不做任何主观假设，是一种最保守的策略。
+
+**熵的定义**:
+$$H(P) = -\sum_{x,y} \tilde{P}(x) P(y|x) \log P(y|x)$$
+
+其中 $\tilde{P}(x)$ 是经验分布。
+
+**特征函数**:
+$$f_i(x, y) = \begin{cases} 1, & \text{如果}x,y\text{满足某个事实} \\ 0, & \text{否则} \end{cases}$$
+
+**约束条件**:
+
+模型期望 = 经验期望
+
+$$E_P[f_i] = E_{\tilde{P}}[f_i]$$
+
+即：
+
+$$\sum_{x,y} \tilde{P}(x) P(y|x) f_i(x,y) = \sum_{x,y} \tilde{P}(x,y) f_i(x,y)$$
+
+**最大熵模型**:
+
+最优解具有指数形式：
+
+$$P_w(y|x) = \frac{1}{Z_w(x)} \exp\left(\sum_{i=1}^{n} w_i f_i(x,y)\right)$$
+
+归一化因子：
+
+$$Z_w(x) = \sum_y \exp\left(\sum_{i=1}^{n} w_i f_i(x,y)\right)$$
+
+**与多项逻辑斯谛回归的关系**:
+
+最大熵模型在数学形式上等价于多项逻辑斯谛回归：
+- 都使用 Softmax 归一化
+- 都是对数线性模型
+- 都用交叉熵作为损失函数
+
+区别：
+- **视角不同**: 最大熵从信息论角度（最大化熵），逻辑回归从概率角度（最大似然）
+- **特征构造**: 最大熵强调特征函数 $f_i(x,y)$，逻辑回归强调特征向量 $x$
+
+**极大似然估计**:
+
+对偶问题：
+
+$$\max_w \sum_{x,y} \tilde{P}(x,y) \log P_w(y|x)$$
+
+等价于最小化负对数似然：
+
+$$\min_w -\sum_{x,y} \tilde{P}(x,y) \log P_w(y|x)$$
+
+**梯度**:
+
+$$\frac{\partial L}{\partial w_i} = \sum_{x,y} \tilde{P}(x) [P_w(y|x) f_i(x,y) - \tilde{P}(y|x) f_i(x,y)]$$
+
+简化为：
+
+$$\frac{\partial L}{\partial w_i} = E_P[f_i] - E_{\tilde{P}}[f_i]$$
+
+即模型期望与经验期望的差。
+
+**优化算法**:
+- 梯度下降法 (GD)
+- 拟牛顿法 (BFGS)
+- 改进的迭代尺度法 (IIS)
+- 通用迭代尺度法 (GIS)
+
+**应用场景**:
+- 自然语言处理（词性标注、命名实体识别）
+- 文本分类
+- 信息抽取
+- 机器翻译
+
+**优势**:
+- 特征灵活，可以组合任意特征
+- 理论基础扎实（最大熵原理）
+- 可解释性强
+- 不需要特征独立性假设（相比朴素贝叶斯）
+
 ## 📈 学习计划与进度
 
 ### 监督学习算法
@@ -535,7 +814,8 @@ $$x = -\frac{b}{w}$$
 | ✅ | **决策树 - 分类树 (基尼指数)** |
 | ✅ | **决策树 - 回归树 (MSE)** |
 | ✅ | **逻辑斯谛回归 - 二项逻辑斯谛回归** |
-| ⬜ | 最大熵模型 |
+| ✅ | **逻辑斯谛回归 - 多项逻辑斯谛回归** |
+| ✅ | **最大熵模型 - 中文词性标注** |
 | ⬜ | 支持向量机 (SVM) |
 | ⬜ | 提升方法 (AdaBoost) |
 | ⬜ | EM算法 |
@@ -551,7 +831,7 @@ $$x = -\frac{b}{w}$$
 | ⬜ | 主成分分析 (PCA) |
 | ⬜ | 神经网络基础 |
 
-**进度统计**: 已完成 9 / 17 个算法 (52.9%)
+**进度统计**: 已完成 11 / 17 个算法 (64.7%)
 
 ## 📖 参考资料
 
