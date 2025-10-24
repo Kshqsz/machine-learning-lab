@@ -975,9 +975,7 @@ $$b^* = y_s - w^* \cdot x_s = y_s - \sum_{i=1}^{N}\alpha_i^* y_i (x_i \cdot x_s)
 
 **决策函数**:
 
-$$
-f(x) = \text{sign}(w^* \cdot x + b^*) = \text{sign}\left(\sum_{i=1}^{N}\alpha_i^* y_i (x_i \cdot x) + b^*\right)
-$$
+$$f(x) = \text{sign}(w^* \cdot x + b^*) = \text{sign}\left(\sum_{i=1}^{N}\alpha_i^* y_i (x_i \cdot x) + b^*\right)$$
 
 **几何间隔**:
 
