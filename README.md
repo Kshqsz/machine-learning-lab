@@ -37,6 +37,8 @@ machine-learning-lab/
 │   └── multinomial_logisitic_regression.py  # 多项逻辑斯谛回归
 ├── max_entropy/                # 最大熵模型
 │   └── max_entropy_nlp_demo.py  # 中文词性标注Demo
+├── svm/                        # 支持向量机
+│   └── svm_dual_linear.py     # 线性可分SVM-对偶形式
 ├── pytorch/                    # PyTorch深度学习
 │   └── tensor_basics.py       # 张量基础操作
 ├── venv/                       # Python虚拟环境
@@ -464,12 +466,103 @@ python max_entropy/max_entropy_nlp_demo.py
 - 适用于序列标注任务
 - 训练过程透明，可监控优化进展
 
+---
+
+### 8. 支持向量机 (Support Vector Machine)
+
+支持向量机是一种二分类模型，其基本思想是在特征空间中找到间隔最大的分离超平面。
+
+#### 线性可分支持向量机 - 对偶形式 (Linear SVM - Dual Form)
+- **文件**: `svm/svm_dual_linear.py`
+- **方法**: 拉格朗日对偶 + 二次规划（SLSQP）
+- **特点**:
+  - 将原始问题转化为对偶问题求解
+  - 使用二次规划求解最优拉格朗日乘子
+  - 自动识别支持向量（α > 0 的样本）
+  - 计算最大间隔分离超平面
+  - 可视化决策边界、间隔边界和支持向量
+
+**原始问题**:
+
+$$\min_{w,b} \frac{1}{2}\|w\|^2$$
+
+约束条件：
+
+$$y_i(w \cdot x_i + b) \geq 1, \quad i=1,2,...,N$$
+
+**对偶问题**:
+
+$$\max_{\alpha} \sum_{i=1}^{N}\alpha_i - \frac{1}{2}\sum_{i=1}^{N}\sum_{j=1}^{N}\alpha_i\alpha_j y_i y_j (x_i \cdot x_j)$$
+
+约束条件：
+
+$$\sum_{i=1}^{N}\alpha_i y_i = 0, \quad \alpha_i \geq 0$$
+
+**参数恢复**:
+
+权重向量：
+
+$$w^* = \sum_{i=1}^{N}\alpha_i^* y_i x_i$$
+
+偏置（选择任一支持向量 $x_j$，满足 $\alpha_j^* > 0$）：
+
+$$b^* = y_j - \sum_{i=1}^{N}\alpha_i^* y_i (x_i \cdot x_j)$$
+
+**分离超平面**:
+
+$$w^* \cdot x + b^* = 0$$
+
+**决策函数**:
+
+$$f(x) = \text{sign}(w^* \cdot x + b^*)$$
+
+**分类间隔**:
+
+$$\text{margin} = \frac{2}{\|w^*\|}$$
+
+**运行示例**:
+```bash
+python svm/svm_dual_linear.py
+```
+
+**训练数据**:
+- 正例：x₁=(3,3), x₂=(4,3)  标签 y=+1
+- 负例：x₃=(1,1)            标签 y=-1
+- 样本数：3个
+
+**训练结果**:
+- **拉格朗日乘子**：α₁=0.25, α₂=0, α₃=0.25
+- **支持向量**：x₁=(3,3) 和 x₃=(1,1)（2个）
+- **权重向量**：w=(0.5, 0.5)
+- **偏置**：b=-2.0
+- **分离超平面**：x₁ + x₂ = 4
+- **分类间隔**：≈ 2.828
+- **训练准确率**：100%
+
+**关键观察**:
+- x₂=(4,3) 的 α₂=0，不是支持向量（在间隔边界之外）
+- 只有位于间隔边界上的样本成为支持向量（f(x)=±1）
+- 支持向量决定了分离超平面，其他样本可以移除而不影响结果
+
+**可视化**:
+- 展示决策边界（黑色实线）
+- 展示间隔边界（灰色虚线，f(x)=±1）
+- 标记支持向量（绿色圆圈）
+- 显示决策区域（彩色背景）
+
+**优势**:
+- 理论基础扎实（结构风险最小化）
+- 最大间隔准则，泛化能力强
+- 只依赖支持向量，模型稀疏
+- 对偶形式便于引入核函数
+
 ## 🛠️ 技术栈
 
 - **Python**: 3.13+
 - **NumPy**: 数值计算
 - **Pandas**: 数据处理
 - **Matplotlib**: 数据可视化
+- **SciPy**: 科学计算（优化算法）
 - **Scikit-learn**: 机器学习库（用于对比验证）
 - **PyTorch**: 深度学习框架（2.9.0+，支持MPS加速）
 
@@ -491,7 +584,7 @@ source venv/bin/activate  # macOS/Linux
 ### 3. 安装依赖
 ```bash
 # 基础依赖
-pip install numpy pandas scikit-learn matplotlib
+pip install numpy pandas scipy scikit-learn matplotlib
 
 # PyTorch (可选，用于深度学习)
 pip install torch torchvision torchaudio
@@ -815,6 +908,112 @@ $$\frac{\partial L}{\partial w_i} = E_P[f_i] - E_{\tilde{P}}[f_i]$$
 - 可解释性强
 - 不需要特征独立性假设（相比朴素贝叶斯）
 
+---
+
+### 支持向量机
+**核心思想**: 在特征空间中找到间隔最大的分离超平面。支持向量机基于结构风险最小化原则，具有很强的泛化能力。
+
+**原始优化问题（硬间隔）**:
+
+$$\min_{w,b} \frac{1}{2}\|w\|^2$$
+
+约束条件：
+
+$$y_i(w \cdot x_i + b) \geq 1, \quad i=1,2,...,N$$
+
+目标是最小化 $\|w\|^2$，等价于最大化间隔 $\frac{2}{\|w\|}$。
+
+**拉格朗日函数**:
+
+引入拉格朗日乘子 $\alpha_i \geq 0$：
+
+$$L(w,b,\alpha) = \frac{1}{2}\|w\|^2 - \sum_{i=1}^{N}\alpha_i[y_i(w \cdot x_i + b) - 1]$$
+
+**对偶问题**:
+
+通过对 $w$ 和 $b$ 求偏导并令其为零：
+
+$$w = \sum_{i=1}^{N}\alpha_i y_i x_i$$
+
+$$\sum_{i=1}^{N}\alpha_i y_i = 0$$
+
+代入拉格朗日函数得到对偶问题：
+
+$$\max_{\alpha} \sum_{i=1}^{N}\alpha_i - \frac{1}{2}\sum_{i=1}^{N}\sum_{j=1}^{N}\alpha_i\alpha_j y_i y_j (x_i \cdot x_j)$$
+
+约束条件：
+
+$$\sum_{i=1}^{N}\alpha_i y_i = 0, \quad \alpha_i \geq 0, \quad i=1,2,...,N$$
+
+**KKT条件**:
+
+$$\alpha_i \geq 0$$
+
+$$y_i(w \cdot x_i + b) - 1 \geq 0$$
+
+$$\alpha_i[y_i(w \cdot x_i + b) - 1] = 0$$
+
+**支持向量**:
+
+满足 $\alpha_i > 0$ 的样本称为支持向量，这些样本位于间隔边界上：
+
+$$y_i(w \cdot x_i + b) = 1$$
+
+非支持向量的 $\alpha_i = 0$，对模型没有影响。
+
+**参数恢复**:
+
+从最优解 $\alpha^*$ 恢复参数：
+
+权重向量：
+
+$$w^* = \sum_{i=1}^{N}\alpha_i^* y_i x_i$$
+
+偏置（选择任一支持向量 $x_s$）：
+
+$$b^* = y_s - w^* \cdot x_s = y_s - \sum_{i=1}^{N}\alpha_i^* y_i (x_i \cdot x_s)$$
+
+**决策函数**:
+
+$$f(x) = \text{sign}(w^* \cdot x + b^*) = \text{sign}\left(\sum_{i=1}^{N}\alpha_i^* y_i (x_i \cdot x) + b^*\right)$$
+
+**几何间隔**:
+
+分离超平面到最近样本点的距离：
+
+$$\gamma = \frac{1}{\|w^*\|}$$
+
+最大间隔（两个间隔边界之间的距离）：
+
+$$\text{margin} = \frac{2}{\|w^*\|}$$
+
+**对偶形式的优势**:
+1. **简化计算**: 对偶问题只依赖于样本的内积 $(x_i \cdot x_j)$
+2. **引入核函数**: 可以用核函数 $K(x_i, x_j)$ 替代内积，实现非线性分类
+3. **稀疏性**: 只有支持向量的 $\alpha_i > 0$，其余为0
+4. **样本数 vs 特征数**: 当样本数 $N$ 远小于特征维度 $d$ 时，对偶形式更高效
+
+**求解方法**:
+- 二次规划（QP）：SLSQP, 内点法
+- SMO算法（Sequential Minimal Optimization）：专门针对SVM的高效算法
+- 坐标上升法
+
+**线性可分的条件**:
+训练数据集线性可分的充要条件是对偶问题有解且存在 $\alpha^*$ 使得：
+
+$$\sum_{i=1}^{N}\alpha_i^* y_i = 0, \quad \alpha_i^* \geq 0$$
+
+**优势**:
+- 最大间隔准则，泛化能力强
+- 只依赖支持向量，模型稀疏
+- 理论基础完善（统计学习理论）
+- 通过核技巧可处理非线性问题
+
+**局限性**:
+- 只适用于二分类（多分类需要组合策略）
+- 对大规模数据集计算开销大
+- 对参数和核函数的选择敏感
+
 ## 📈 学习计划与进度
 
 ### 监督学习算法
@@ -832,7 +1031,9 @@ $$\frac{\partial L}{\partial w_i} = E_P[f_i] - E_{\tilde{P}}[f_i]$$
 | ✅ | **逻辑斯谛回归 - 二项逻辑斯谛回归** |
 | ✅ | **逻辑斯谛回归 - 多项逻辑斯谛回归** |
 | ✅ | **最大熵模型 - 中文词性标注** |
-| ⬜ | 支持向量机 (SVM) |
+| ✅ | **支持向量机 - 线性可分SVM (对偶形式)** |
+| ⬜ | 支持向量机 - 线性SVM (软间隔) |
+| ⬜ | 支持向量机 - 非线性SVM (核函数) |
 | ⬜ | 提升方法 (AdaBoost) |
 | ⬜ | EM算法 |
 | ⬜ | 隐马尔可夫模型 |
@@ -847,7 +1048,7 @@ $$\frac{\partial L}{\partial w_i} = E_P[f_i] - E_{\tilde{P}}[f_i]$$
 | ⬜ | 主成分分析 (PCA) |
 | ⬜ | 神经网络基础 |
 
-**进度统计**: 已完成 11 / 17 个算法 (64.7%)
+**进度统计**: 已完成 12 / 19 个算法 (63.2%)
 
 ## 📖 参考资料
 
