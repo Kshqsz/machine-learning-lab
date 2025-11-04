@@ -166,7 +166,7 @@ class ForwardStagewiseClassifier:
             
             if self.loss == 'exponential':
                 # 指数损失：权重为 w_i = exp(-y_i * f(x_i))
-                weights = loss_values
+                weights = loss_valuesw
                 weights = weights / np.sum(weights)  # 归一化
                 
                 print(f"样本权重分布 D_{m+1}:")
