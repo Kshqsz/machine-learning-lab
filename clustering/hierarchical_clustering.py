@@ -416,7 +416,7 @@ def demo_basic_hierarchical_clustering():
     plt.tight_layout()
     plt.savefig('clustering/hierarchical_clustering_comparison.png', dpi=150, bbox_inches='tight')
     print(f"\n图形已保存: clustering/hierarchical_clustering_comparison.png")
-    plt.show()
+    plt.close()
 
 
 def demo_distance_metrics():
@@ -458,7 +458,7 @@ def demo_distance_metrics():
     plt.tight_layout()
     plt.savefig('clustering/hierarchical_distance_metrics.png', dpi=150, bbox_inches='tight')
     print(f"\n图形已保存: clustering/hierarchical_distance_metrics.png")
-    plt.show()
+    plt.close()
 
 
 def demo_elbow_method():
@@ -512,7 +512,7 @@ def demo_elbow_method():
     plt.tight_layout()
     plt.savefig('clustering/hierarchical_elbow_method.png', dpi=150, bbox_inches='tight')
     print(f"\n图形已保存: clustering/hierarchical_elbow_method.png")
-    plt.show()
+    plt.close()
 
 
 if __name__ == "__main__":
