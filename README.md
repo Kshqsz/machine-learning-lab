@@ -60,6 +60,8 @@ machine-learning-lab/
 ├── clustering/                 # 聚类算法
 │   ├── hierarchical_clustering.py  # 层次聚类（凝聚式）
 │   └── kmeans_clustering.py   # K-Means聚类
+├── svd/                        # 奇异值分解
+│   └── svd_decomposition.py   # SVD分解与应用
 ├── pytorch/                    # PyTorch深度学习
 │   └── tensor_basics.py       # 张量基础操作
 ├── venv/                       # Python虚拟环境
