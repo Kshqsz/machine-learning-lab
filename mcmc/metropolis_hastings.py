@@ -25,8 +25,6 @@ Metropolis-Hastings算法是马尔可夫链蒙特卡洛（MCMC）方法的核心
 2. 独立采样器：q(x'|x) = q(x'), α = min(1, π(x')q(x)/(π(x)q(x')))
 3. 自适应步长：根据接受率调整提议分布的方差
 
-作者：AI助手
-日期：2025年11月13日
 """
 
 import numpy as np
