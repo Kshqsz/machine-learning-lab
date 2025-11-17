@@ -7,7 +7,6 @@ Linear-chain Conditional Random Field - Forward-Backward Algorithm
 2. 边缘概率 P(y_i | x)
 3. 特征期望值（用于梯度计算）
 
-参考：李航《统计学习方法》第11章
 """
 
 import numpy as np
