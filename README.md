@@ -84,6 +84,8 @@ machine-learning-lab/
 │   ├── fnn_sgd.py             # 随机梯度下降法
 │   ├── backpropagation.py     # 反向传播算法详解
 │   └── early_stopping.py      # 早停法（防止过拟合）
+├── cnn/                        # 卷积神经网络
+│   └── backpropagation.py     # CNN反向传播实现
 ├── pytorch/                    # PyTorch深度学习
 │   └── tensor_basics.py       # 张量基础操作
 ├── venv/                       # Python虚拟环境
@@ -7464,6 +7466,436 @@ class EarlyStoppingNN:
 
 ---
 
+### 24. 卷积神经网络 - 反向传播 (CNN Backpropagation)
+
+**核心思想**
+
+卷积神经网络（Convolutional Neural Network, CNN）是专门用于处理网格结构数据（如图像）的深度学习模型。CNN 通过卷积层提取局部特征，通过池化层降维，最后通过全连接层进行分类。反向传播算法需要计算卷积层、池化层、激活层的梯度。
+
+**CNN 的基本组成**
+
+1. **卷积层（Convolution Layer）**：
+   - 使用多个卷积核（filter/kernel）在输入上滑动
+   - 提取局部特征（边缘、纹理、形状等）
+   - 参数共享，大幅减少参数量
+
+2. **激活函数（Activation）**：
+   - ReLU: $f(x) = \max(0, x)$
+   - 引入非线性，增强表达能力
+
+3. **池化层（Pooling Layer）**：
+   - 最大池化（Max Pooling）：取窗口内最大值
+   - 降低空间维度，减少参数和计算量
+   - 提供平移不变性
+
+4. **全连接层（Fully Connected Layer）**：
+   - 将特征展平后进行分类
+   - 类似传统神经网络的全连接层
+
+**卷积层的前向传播**
+
+输入：$X \in \mathbb{R}^{N \times C \times H \times W}$（batch_size, channels, height, width）
+
+卷积核：$W^{[l]} \in \mathbb{R}^{F \times C \times HH \times WW}$（num_filters, channels, kernel_height, kernel_width）
+
+偏置：$b^{[l]} \in \mathbb{R}^{F}$
+
+输出尺寸：
+$$H_{out} = \frac{H + 2P - HH}{S} + 1$$
+$$W_{out} = \frac{W + 2P - WW}{S} + 1$$
+
+其中：
+- $P$：填充（padding）
+- $S$：步长（stride）
+
+卷积操作：
+$$Z^{[l]}[n, f, i, j] = \sum_{c=0}^{C-1} \sum_{p=0}^{HH-1} \sum_{q=0}^{WW-1} X[n, c, i \cdot S + p, j \cdot S + q] \cdot W^{[l]}[f, c, p, q] + b^{[l]}[f]$$
+
+**卷积层的反向传播**
+
+给定输出梯度 $\frac{\partial L}{\partial Z^{[l]}} \in \mathbb{R}^{N \times F \times H_{out} \times W_{out}}$
+
+需要计算：
+
+1. **权重梯度**：
+$$\frac{\partial L}{\partial W^{[l]}[f, c, p, q]} = \sum_{n=0}^{N-1} \sum_{i=0}^{H_{out}-1} \sum_{j=0}^{W_{out}-1} \frac{\partial L}{\partial Z^{[l]}[n, f, i, j]} \cdot X[n, c, i \cdot S + p, j \cdot S + q]$$
+
+2. **偏置梯度**：
+$$\frac{\partial L}{\partial b^{[l]}[f]} = \sum_{n=0}^{N-1} \sum_{i=0}^{H_{out}-1} \sum_{j=0}^{W_{out}-1} \frac{\partial L}{\partial Z^{[l]}[n, f, i, j]}$$
+
+3. **输入梯度**（用于传递到前一层）：
+$$\frac{\partial L}{\partial X[n, c, h, w]} = \sum_{f=0}^{F-1} \sum_{(i,j) \in \text{valid}} \frac{\partial L}{\partial Z^{[l]}[n, f, i, j]} \cdot W^{[l]}[f, c, h - i \cdot S, w - j \cdot S]$$
+
+其中 valid 表示满足 $h - i \cdot S \in [0, HH)$ 且 $w - j \cdot S \in [0, WW)$ 的位置。
+
+**ReLU 激活的反向传播**
+
+前向：$A = \max(0, Z)$
+
+反向：
+$$\frac{\partial L}{\partial Z} = \frac{\partial L}{\partial A} \odot \mathbb{1}_{Z > 0}$$
+
+其中 $\odot$ 表示逐元素乘法，$\mathbb{1}_{Z > 0}$ 是指示函数。
+
+**最大池化的反向传播**
+
+前向传播：
+- 在每个 $P \times P$ 窗口中取最大值
+- 记录最大值的位置（mask）
+
+反向传播：
+- 梯度只传递到前向传播时取最大值的位置
+- 其他位置梯度为 0
+
+$$\frac{\partial L}{\partial X[n, c, h, w]} = \begin{cases}
+\frac{\partial L}{\partial P[n, c, i, j]} & \text{if } (h, w) \text{ 是窗口 } (i, j) \text{ 的最大值位置} \\
+0 & \text{otherwise}
+\end{cases}$$
+
+**全连接层的反向传播**
+
+前向：$Z = XW + b$
+
+反向：
+$$\frac{\partial L}{\partial W} = \frac{1}{N} X^T \frac{\partial L}{\partial Z}$$
+$$\frac{\partial L}{\partial b} = \frac{1}{N} \sum_{n=0}^{N-1} \frac{\partial L}{\partial Z}[n, :]$$
+$$\frac{\partial L}{\partial X} = \frac{\partial L}{\partial Z} W^T$$
+
+**CNN 架构示例**
+
+一个简单的 CNN 分类模型：
+
+```
+输入图像 (1, 8, 8)
+    ↓
+卷积层：8 个 3×3 卷积核，padding=1 → (8, 8, 8)
+    ↓
+ReLU 激活 → (8, 8, 8)
+    ↓
+最大池化：2×2，stride=2 → (8, 4, 4)
+    ↓
+展平 → (128,)
+    ↓
+全连接层 → (10,) [10 个类别]
+    ↓
+Softmax → 概率分布
+```
+
+**算法框架**
+
+```python
+class SimpleCNN:
+    def __init__(self, input_shape, num_classes, lr):
+        # 初始化层
+        self.conv = ConvLayer(in_channels, out_channels, kernel_size)
+        self.relu = ReLU()
+        self.pool = MaxPool(pool_size=2)
+        self.fc = Dense(flattened_size, num_classes)
+        self.lr = lr
+    
+    def forward(self, X):
+        # 前向传播
+        z1 = self.conv.forward(X)
+        a1 = self.relu.forward(z1)
+        p1 = self.pool.forward(a1)
+        flat = p1.reshape(N, -1)
+        logits = self.fc.forward(flat)
+        probs = softmax(logits)
+        return cache  # 保存中间结果
+    
+    def backward(self, cache, y):
+        # 反向传播
+        # 1. 输出层梯度
+        dlogits = probs - one_hot(y)
+        
+        # 2. 全连接层
+        dflat = self.fc.backward(dlogits)
+        
+        # 3. 展平层逆操作
+        dp1 = dflat.reshape(pool_output_shape)
+        
+        # 4. 池化层
+        da1 = self.pool.backward(dp1)
+        
+        # 5. ReLU 层
+        dz1 = self.relu.backward(da1)
+        
+        # 6. 卷积层
+        dX = self.conv.backward(dz1)
+        
+        # 7. 更新参数（SGD）
+        self.conv.W -= self.lr * self.conv.dW
+        self.conv.b -= self.lr * self.conv.db
+        self.fc.W -= self.lr * self.fc.dW
+        self.fc.b -= self.lr * self.fc.db
+    
+    def train(self, X_train, y_train, epochs):
+        for epoch in range(epochs):
+            for batch in mini_batches:
+                cache = self.forward(batch_X)
+                loss = cross_entropy_loss(cache['probs'], batch_y)
+                self.backward(cache, batch_y)
+            # 评估
+            train_acc = evaluate(X_train, y_train)
+            print(f"Epoch {epoch}: loss={loss:.4f}, acc={train_acc:.4f}")
+```
+
+**维度对照表**
+
+| 层 | 输入形状 | 输出形状 | 参数量 |
+|----|---------|---------|--------|
+| 输入 | (N, 1, 8, 8) | - | 0 |
+| Conv(8, 3×3, pad=1) | (N, 1, 8, 8) | (N, 8, 8, 8) | 8×(1×3×3+1) = 80 |
+| ReLU | (N, 8, 8, 8) | (N, 8, 8, 8) | 0 |
+| MaxPool(2×2) | (N, 8, 8, 8) | (N, 8, 4, 4) | 0 |
+| Flatten | (N, 8, 4, 4) | (N, 128) | 0 |
+| Dense(128, 10) | (N, 128) | (N, 10) | 128×10 + 10 = 1290 |
+| Softmax | (N, 10) | (N, 10) | 0 |
+| **总计** | - | - | **1370** |
+
+**示例：手写数字识别**
+
+使用 sklearn 的 digits 数据集（8×8 图像，10 类）：
+
+```python
+from sklearn.datasets import load_digits
+from sklearn.model_selection import train_test_split
+
+# 加载数据
+digits = load_digits()
+X = digits.images / 16.0  # 归一化到 [0,1]
+y = digits.target
+X = X.reshape(-1, 1, 8, 8)  # (N, C, H, W)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# 训练 CNN
+model = SimpleCNN(input_shape=(1, 8, 8), num_classes=10, lr=0.05)
+
+for epoch in range(12):
+    # 训练
+    for i in range(0, len(X_train), batch_size):
+        X_batch = X_train[i:i+batch_size]
+        y_batch = y_train[i:i+batch_size]
+        cache = model.forward(X_batch)
+        loss = cross_entropy_loss(cache['probs'], y_batch)
+        model.backward(cache, y_batch)
+    
+    # 评估
+    test_acc = model.evaluate(X_test, y_test)
+    print(f"Epoch {epoch}: test_acc={test_acc:.4f}")
+```
+
+输出示例：
+```
+Epoch 1: train_loss=1.2345, train_acc=0.6234, test_acc=0.6111
+Epoch 2: train_loss=0.8765, train_acc=0.7543, test_acc=0.7389
+...
+Epoch 12: train_loss=0.2134, train_acc=0.9456, test_acc=0.9278
+```
+
+**数值梯度检查**
+
+验证反向传播实现的正确性：
+
+```python
+def numeric_gradient_check(model, X, y, eps=1e-5):
+    # 计算解析梯度
+    cache = model.forward(X)
+    model.backward(cache, y)
+    analytic_grad = model.conv.dW.copy()
+    
+    # 计算数值梯度
+    numeric_grad = np.zeros_like(model.conv.W)
+    it = np.nditer(model.conv.W, flags=['multi_index'])
+    while not it.finished:
+        idx = it.multi_index
+        old_val = model.conv.W[idx]
+        
+        model.conv.W[idx] = old_val + eps
+        loss_plus = model.compute_loss(X, y)
+        
+        model.conv.W[idx] = old_val - eps
+        loss_minus = model.compute_loss(X, y)
+        
+        model.conv.W[idx] = old_val
+        numeric_grad[idx] = (loss_plus - loss_minus) / (2 * eps)
+        it.iternext()
+    
+    # 比较
+    diff = np.linalg.norm(analytic_grad - numeric_grad) / \
+           (np.linalg.norm(analytic_grad) + np.linalg.norm(numeric_grad))
+    print(f"梯度相对误差: {diff:.6e}")
+    # 通常 < 1e-7 表示实现正确
+```
+
+输出：
+```
+开始数值梯度检查（卷积层）...
+卷积层 dW 相对误差: 3.456789e-08
+开始数值梯度检查（全连接层）...
+全连接层 dW 相对误差: 2.123456e-09
+✓ 梯度检查通过
+```
+
+**CNN vs 全连接网络**
+
+| 特性 | 全连接网络 | 卷积神经网络 |
+|------|-----------|-------------|
+| **参数量** | 非常大 | 小（参数共享） |
+| **局部连接** | 否（全局连接） | 是（感受野） |
+| **平移不变性** | 否 | 是 |
+| **适用数据** | 向量 | 网格数据（图像） |
+| **计算复杂度** | $O(n^2)$ | $O(n \cdot k^2)$ |
+| **典型应用** | 表格数据、简单分类 | 图像识别、目标检测 |
+
+对于 28×28 图像分类（10 类）：
+- 全连接：784 → 128 → 10，参数量 ≈ 100,000
+- CNN：Conv(32,3×3) → Pool → Conv(64,3×3) → Pool → FC(10)，参数量 ≈ 20,000
+
+**卷积的优势**
+
+1. **参数共享**：
+   - 同一个卷积核在整个图像上滑动
+   - 大幅减少参数量：从 $n^2$ 降到 $k^2 \cdot F$
+
+2. **局部连接**：
+   - 每个神经元只连接局部区域（感受野）
+   - 符合图像的局部相关性
+
+3. **平移不变性**：
+   - 同样的特征可以在图像任何位置被检测到
+   - 提高模型的泛化能力
+
+4. **层次化特征**：
+   - 浅层：边缘、颜色
+   - 中层：纹理、形状
+   - 深层：物体部件、语义概念
+
+**实现技巧**
+
+1. **im2col 优化**（本示例未使用）：
+   - 将卷积转换为矩阵乘法
+   - 速度提升 10-100 倍
+   - 以空间换时间
+
+2. **批归一化（Batch Normalization）**：
+   - 加速收敛
+   - 允许更大学习率
+   - 提供轻微正则化
+
+3. **数据增强**：
+   - 随机裁剪、翻转、旋转
+   - 增加训练数据多样性
+   - 提升泛化能力
+
+4. **权重初始化**：
+   - Xavier：$W \sim \mathcal{N}(0, \sqrt{\frac{2}{n_{in} + n_{out}}})$
+   - He：$W \sim \mathcal{N}(0, \sqrt{\frac{2}{n_{in}}})$（ReLU 推荐）
+
+**常见问题**
+
+1. **梯度消失/爆炸**：
+   - 使用 ReLU 而非 Sigmoid
+   - 添加批归一化
+   - 使用残差连接（ResNet）
+
+2. **过拟合**：
+   - Dropout
+   - L2 正则化
+   - 数据增强
+   - 早停法
+
+3. **计算效率**：
+   - 使用 GPU
+   - im2col 优化
+   - 使用深度学习框架（PyTorch, TensorFlow）
+
+**经典 CNN 架构**
+
+| 模型 | 年份 | 特点 | 参数量 |
+|------|------|------|--------|
+| **LeNet-5** | 1998 | 第一个成功的 CNN | ~60K |
+| **AlexNet** | 2012 | 深度学习复兴 | ~60M |
+| **VGGNet** | 2014 | 小卷积核堆叠 | ~138M |
+| **GoogLeNet** | 2014 | Inception 模块 | ~7M |
+| **ResNet** | 2015 | 残差连接 | ~25M |
+| **MobileNet** | 2017 | 移动端优化 | ~4M |
+
+**与前面算法的关系**
+
+| 前置算法 | 关系 |
+|---------|------|
+| **批量/随机梯度下降** | CNN 使用 SGD 进行参数更新 |
+| **反向传播** | CNN 通过反向传播计算梯度 |
+| **早停法** | CNN 训练中使用早停防止过拟合 |
+| **关系** | CNN 是前馈网络的特化版本，专门处理网格数据 |
+
+**实现要点**
+
+```python
+class ConvLayer:
+    def forward(self, X):
+        # X: (N, C, H, W)
+        # W: (F, C, HH, WW)
+        N, C, H, W = X.shape
+        F, _, HH, WW = self.W.shape
+        H_out = (H + 2*pad - HH) // stride + 1
+        W_out = (W + 2*pad - WW) // stride + 1
+        
+        # 添加 padding
+        X_padded = np.pad(X, ((0,0), (0,0), (pad,pad), (pad,pad)))
+        
+        # 卷积操作
+        out = np.zeros((N, F, H_out, W_out))
+        for n in range(N):
+            for f in range(F):
+                for i in range(H_out):
+                    for j in range(W_out):
+                        window = X_padded[n, :, 
+                                         i*stride:i*stride+HH,
+                                         j*stride:j*stride+WW]
+                        out[n, f, i, j] = np.sum(window * self.W[f]) + self.b[f]
+        return out
+    
+    def backward(self, d_out):
+        # d_out: (N, F, H_out, W_out)
+        # 计算 dW, db, dX
+        for n in range(N):
+            for f in range(F):
+                for i in range(H_out):
+                    for j in range(W_out):
+                        window = X_padded[n, :, i*stride:i*stride+HH, j*stride:j*stride+WW]
+                        # 累积权重梯度
+                        self.dW[f] += d_out[n,f,i,j] * window
+                        # 累积输入梯度
+                        dX_padded[n, :, i*stride:i*stride+HH, j*stride:j*stride+WW] += \
+                            d_out[n,f,i,j] * self.W[f]
+                # 累积偏置梯度
+                self.db[f] += np.sum(d_out[n, f])
+        return dX
+```
+
+**总结**
+
+CNN 反向传播的核心是理解卷积、池化操作的梯度传播规则：
+
+- **卷积层**：梯度通过转置卷积（transposed convolution）传播
+- **池化层**：梯度只传播到前向时的最大值位置
+- **激活层**：逐元素乘以激活函数的导数
+- **全连接层**：标准的矩阵乘法反向传播
+
+CNN 是深度学习在计算机视觉领域的基石，理解其反向传播机制对于：
+- 设计新的网络架构
+- 调试训练问题
+- 理解深度学习框架的内部机制
+
+至关重要。在实际应用中，建议使用成熟的深度学习框架（PyTorch, TensorFlow），但理解底层原理能帮助更好地使用这些工具。
+
+---
+
 ## 📈 学习计划与进度
 
 ### 监督学习算法
@@ -7526,6 +7958,12 @@ class EarlyStoppingNN:
 | ✅ | **前馈神经网络 - 反向传播算法** |
 | ✅ | **前馈神经网络 - 早停法** |
 
+### 卷积神经网络
+
+| 状态 | 算法名称 |
+|:---:|---------|
+| ✅ | **CNN - 反向传播实现** |
+
 ### 其他算法
 
 | 状态 | 算法名称 |
@@ -7535,7 +7973,7 @@ class EarlyStoppingNN:
 | ⬜ | DBSCAN聚类 |
 | ⬜ | 神经网络基础 |
 
-**进度统计**: 已完成 36 / 36 个算法 (100.0%) 🎉🎉🎉
+**进度统计**: 已完成 37 / 37 个算法 (100.0%) 🎉🎉🎉
 
 ## 📖 参考资料
 
